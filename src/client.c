@@ -18,6 +18,28 @@ void establishConnection() {
     char *line = readCommand();
     command_struct command = parse(line);
     sock = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in address;
+    struct sockaddr_in serv_addr;
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("\n Socket creation error \n");
+        return -1;
+    }
+
+    memset(&serv_addr, '0', sizeof(serv_addr));
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = command.port_number;
+
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, command.ip_number, &serv_addr.sin_addr) <= 0) {
+        perror("\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+
+    if (connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+        perror("\nConnection Failed \n");
+        return -1;
+    }
 }
 
 char *readCommand() {
@@ -67,10 +89,9 @@ command_struct parse(char *command) {
         temp[i++] = command[index - 1];
     }
     temp[i] = '\0';
-    if(strcmp(temp, "GET")){
+    if (strcmp(temp, "GET")) {
         result.type = 0;
-    }
-    else{
+    } else {
         result.type = 1;
     }
     i = 0;
@@ -85,7 +106,7 @@ command_struct parse(char *command) {
     temp[i] = '\0';
     i = 0;
     result.ip_number = atoi(temp);
-    if(command[index] == '\0'){
+    if (command[index] == '\0') {
         return result;
     }
     i = 0;
