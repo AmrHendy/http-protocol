@@ -4,6 +4,7 @@
 
 #ifndef SERVER_H
 #define SERVER_H
+#define "status.h"
 
 void initServer();
 
