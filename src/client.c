@@ -10,48 +10,41 @@
 // 3) send the request using Sender
 // 4) get the response using Receiver
 // 5) execute action
-FILE *fp;
-bool file = false;
-int sock;
 
-void establishConnection() {
+FILE *fp;
+int client_socketfd;
+
+// return status of connection
+int establishConnection(char * server_ipaddress, int server_port_number) {
     char *line = readCommand();
     command_struct command = parse(line);
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in address;
     struct sockaddr_in serv_addr;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("\n Socket creation error \n");
-        return -1;
+        return 0;
     }
-
     memset(&serv_addr, '0', sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = command.port_number;
-
+    serv_addr.sin_port = htons(server_port_number);
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, command.ip_number, &serv_addr.sin_addr) <= 0) {
-        perror("\nInvalid address/ Address not supported \n");
-        return -1;
+    if (inet_pton(AF_INET, server_ipaddress, &serv_addr.sin_addr) <= 0) {
+        perror("\nInvalid address / Address not supported \n");
+        return 0;
     }
 
     if (connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
         perror("\nConnection Failed \n");
-        return -1;
+        return 0;
     }
+    client_socketfd = sockaddr_in;
+    return 1;
 }
 
 char *readCommand() {
-    if (fp == NULL && !file) {
-        fp = fopen(file_name, "r");
-        file = true;
-    }
-    if (fp == NULL) {
-        perror("Error while opening the file.\n");
-        file = false;
-        exit(EXIT_FAILURE);
-    }
+    if(fp == NULL) return "";
     char command[100];
     int index = 0;
     char c = fgetc(fp);
@@ -67,9 +60,27 @@ char *readCommand() {
     return command;
 }
 
-void startClient(int port_number, int ip_number) {
+void startClient(char* ip_number, int port_number) {
     setIPNumber(ip_number);
     setPortNumber(port_number);
+    // open the file in start Client once.
+    fp = fopen(file_name, "r");
+    if (fp == NULL) {
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+    while(1){
+        char * command_line = readCommand();
+        command_struct command = parse(command_line);
+        printf("Trying to connect to: %s on port %d requesting url %s\n",command.ip_number, command.port_number, command.file_name);
+        int status = establishConnection(command.ip_number, command.port_number);
+        if(status == 0){
+            perror("Failed to connect to the server");
+            exit(EXIT_FAILURE);
+        }
+        printf("Connected Successfully to the server\n");
+        // handling the request using sender
+    }
 }
 
 void setPortNumber(int num) {
@@ -83,38 +94,49 @@ void setIPNumber(int num) {
 command_struct parse(char *command) {
     command_struct result;
     int index = 0;
-    int i = 0;
+    int curr_index = 0;
     char temp[100];
-    while (command[index++] != ' ') {
-        temp[i++] = command[index - 1];
+    // extract request type
+    while(command[index] != ' ') {
+        temp[curr_index++] = command[index++];
     }
-    temp[i] = '\0';
-    if (strcmp(temp, "GET")) {
-        result.type = 0;
+    index++;
+    temp[curr_index] = '\0';
+    if (strcmp(temp, "GET") == 0) {
+        result.type = GET;
     } else {
-        result.type = 1;
+        result.type = POST
     }
-    i = 0;
-    while (command[index++] != ' ') {
-        result.file_name[i++] = command[index - 1];
+
+    // extract file url
+    curr_index = 0;
+    while (command[index] != ' ') {
+        result.file_name[curr_index++] = command[index++];
     }
-    result.file_name[i] = '\0';
-    i = 0;
+    index++;
+    result.file_name[curr_index] = '\0';
+
+    // extract host ip
+    memset(temp, '0', sizeof(temp));
+    curr_index = 0;
     while (command[index] != ' ' || command[index] != '\0') {
-        temp[i++] = command[index++];
+        temp[curr_index++] = command[index++];
     }
-    temp[i] = '\0';
+    temp[curr_index] = '\0';
     i = 0;
-    result.ip_number = atoi(temp);
+    result.ip_number = temp;
+
+    // extract the port number if exists
     if (command[index] == '\0') {
         return result;
     }
-    i = 0;
+    memset(temp, '0', sizeof(temp));
+    curr_index = 0;
+    index++;
     while (command[index] != '\0') {
-        temp[i++] = command[index++];
+        temp[curr_index++] = command[index];
     }
-    temp[i] = '\0';
-    i = 0;
+    temp[curr_index] = '\0';
     result.port_number = atoi(temp);
     return result;
 }

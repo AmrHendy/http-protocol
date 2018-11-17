@@ -13,21 +13,22 @@
 
 void startClient();
 
+typedef enum {GET, POST} requestType;
 typedef struct command_struct{
-    int type;
+    requestType type;
     char file_name[100];
-    int ip_number;
+    char ip_number[100];
     int port_number = DEFAULT_PORT_NUMBER;
 };
 
 const char *commands_file = "./commands_file.txt";
 int port_number;
-int ip_number;
+char* ip_number;
 
 void establishConnection();
 
 char *readCommand();
 
-void startClient();
+void startClient(char* ip_number, int port_number);
 
 #endif //CLIENT_H
