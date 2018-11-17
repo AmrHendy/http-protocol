@@ -16,13 +16,19 @@ void receiveResponse();
 void receiveRequest(char *request, int request_size, int client_socketfd);
 
 /*
- * Server call this function to respond to GET request from client.
+ * A function to get file name from GET request
  */
-void receiveGETRequest(char *get_request, int request_size, int client_socketfd);
+string getFilePath(string p_toParse);
 
 /*
- * Server call this function to respond to POST request from client.
+ * open the required file then send it.
  */
-void receivePOSTRequest(char *get_request, int request_size, int client_socketfd);
+void openFileWithPathAndSend(string file_path, int client);
+
+/*
+ * sending file to client
+ */
+
+void sendFile(FILE* file, int client);
 
 #endif //RECEIVER_H
