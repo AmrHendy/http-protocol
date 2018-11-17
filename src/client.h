@@ -9,23 +9,23 @@
 
 #ifndef CLIENT_H
 #define CLIENT_H
-#define DEFAULT_PORT_NUMBER 80;
+#define DEFAULT_PORT_NUMBER "80";
 
 void startClient();
 
-typedef enum {GET, POST} requestType;
+typedef enum {GET, POST, OTHER} requestType;
 typedef struct command_struct{
     requestType type;
-    char file_name[100];
-    char ip_number[100];
-    int port_number = DEFAULT_PORT_NUMBER;
+    char* file_name;
+    char* ip_number;
+    char* port_number = DEFAULT_PORT_NUMBER;
 };
 
 const char *commands_file = "./commands_file.txt";
-int port_number;
-char* ip_number;
+char* client_port_number;
+char* client_ip;
 
-void establishConnection();
+int establishConnection(char * client_ipaddress, int client_port_number);
 
 char *readCommand();
 

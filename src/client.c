@@ -15,9 +15,7 @@ FILE *fp;
 int client_socketfd;
 
 // return status of connection
-int establishConnection(char * server_ipaddress, int server_port_number) {
-    char *line = readCommand();
-    command_struct command = parse(line);
+int establishConnection(char * client_ipaddress, int client_port_number) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in address;
     struct sockaddr_in serv_addr;
@@ -28,9 +26,9 @@ int establishConnection(char * server_ipaddress, int server_port_number) {
     memset(&serv_addr, '0', sizeof(serv_addr));
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(server_port_number);
+    serv_addr.sin_port = htons(client_port_number);
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, server_ipaddress, &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, client_ipaddress, &serv_addr.sin_addr) <= 0) {
         perror("\nInvalid address / Address not supported \n");
         return 0;
     }
@@ -60,9 +58,9 @@ char *readCommand() {
     return command;
 }
 
-void startClient(char* ip_number, int port_number) {
-    setIPNumber(ip_number);
-    setPortNumber(port_number);
+void startClient(char* client_hostname, char* client_portnumber) {
+    setIPNumber(client_hostname);
+    setPortNumber(client_portnumber);
     // open the file in start Client once.
     fp = fopen(file_name, "r");
     if (fp == NULL) {
@@ -73,7 +71,7 @@ void startClient(char* ip_number, int port_number) {
         char * command_line = readCommand();
         command_struct command = parse(command_line);
         printf("Trying to connect to: %s on port %d requesting url %s\n",command.ip_number, command.port_number, command.file_name);
-        int status = establishConnection(command.ip_number, command.port_number);
+        int status = establishConnection(client_hostname, atoi(client_portnumber));
         if(status == 0){
             perror("Failed to connect to the server");
             exit(EXIT_FAILURE);
@@ -83,12 +81,12 @@ void startClient(char* ip_number, int port_number) {
     }
 }
 
-void setPortNumber(int num) {
-    port_number = num;
+void setPortNumber(int portnumber) {
+    client_port_number = portnumber;
 }
 
-void setIPNumber(int num) {
-    ip_number = num;
+void setIPNumber(char* hostname) {
+    client_ip = hostname;
 }
 
 command_struct parse(char *command) {
@@ -96,6 +94,7 @@ command_struct parse(char *command) {
     int index = 0;
     int curr_index = 0;
     char temp[100];
+    memset(temp, '\0', sizeof(temp));
     // extract request type
     while(command[index] != ' ') {
         temp[curr_index++] = command[index++];
@@ -104,39 +103,44 @@ command_struct parse(char *command) {
     temp[curr_index] = '\0';
     if (strcmp(temp, "GET") == 0) {
         result.type = GET;
-    } else {
+    }else if (strcmp(temp, "POST") == 0){
         result.type = POST
+    }
+    else{
+        result.type = OTHER;
     }
 
     // extract file url
     curr_index = 0;
+    memset(temp, '\0', sizeof(temp));
     while (command[index] != ' ') {
-        result.file_name[curr_index++] = command[index++];
+        temp[curr_index++] = command[index++];
     }
     index++;
-    result.file_name[curr_index] = '\0';
+    temp[curr_index] = '\0';
+    result.file_name = temp;
 
     // extract host ip
-    memset(temp, '0', sizeof(temp));
+    memset(temp, '\0', sizeof(temp));
     curr_index = 0;
     while (command[index] != ' ' || command[index] != '\0') {
         temp[curr_index++] = command[index++];
     }
     temp[curr_index] = '\0';
-    i = 0;
+    curr_index = 0;
     result.ip_number = temp;
 
     // extract the port number if exists
     if (command[index] == '\0') {
         return result;
     }
-    memset(temp, '0', sizeof(temp));
+    memset(temp, '\0', sizeof(temp));
     curr_index = 0;
     index++;
     while (command[index] != '\0') {
         temp[curr_index++] = command[index];
     }
     temp[curr_index] = '\0';
-    result.port_number = atoi(temp);
+    result.port_number = temp;
     return result;
 }
