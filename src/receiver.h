@@ -8,7 +8,7 @@
 /*
  * Client call this function to receive response from the serevr.
  */
-void receiveResponse();
+void receiveGETResponse(int client_socketfd, char *filename){
 
 /*
  * Server call this function to respond to any request from client.

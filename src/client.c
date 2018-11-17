@@ -41,6 +41,10 @@ int establishConnection(char * client_ipaddress, int client_port_number) {
     return 1;
 }
 
+void closeconnection(){
+    close(client_socketfd);
+}
+
 char *readCommand() {
     if(fp == NULL) return "";
     char command[100];
@@ -57,6 +61,7 @@ char *readCommand() {
     }
     return command;
 }
+
 
 void startClient(char* client_hostname, char* client_portnumber) {
     setIPNumber(client_hostname);
@@ -78,6 +83,8 @@ void startClient(char* client_hostname, char* client_portnumber) {
         }
         printf("Connected Successfully to the server\n");
         // handling the request using sender
+        sendRequest(command.type, command.ip_number, command.port_number, command.file_name, client_socketfd);
+        closeconnection();
     }
 }
 

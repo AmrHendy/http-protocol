@@ -11,9 +11,13 @@ const long long TIMEOUT = 5LL:
 void sendRequest(requestType type, char* hostname, char * port_number, char * file_url, int client_socketfd){
     if(type == GET){
         sendGETRequest(hostname, port_number, file_url, client_socketfd);
+        // server will respond to the client with success and content of desired file
+        // or failed 404 Not Found
+
     }
     else if(type == POST){
         sendPOSTRequest();
+        // server will not respond to the client.
     }
     else{
         perror("unsupported request type");
@@ -21,6 +25,8 @@ void sendRequest(requestType type, char* hostname, char * port_number, char * fi
 }
 
 void sendGETRequest(char* hostname, char * port_number, char * file_url, int client_socketfd) {
+    // Note: If the file is not found (in case of GET), the server should respond with(as
+    // would a real http server) HTTP/1.0 404 Not Found\r\n
     char * request_buffer = (char *) malloc(1000);
     memset(request_buffer, '\0', sizeof(request_buffer));
     /*
@@ -32,7 +38,7 @@ void sendGETRequest(char* hostname, char * port_number, char * file_url, int cli
         int status = sendBufferToSocket(request_buffer, length, client_socketfd);
         if(status == 0){
             perror("Can't send GET Request from client");
-            // i don't know whether we should send the request again or ignore.
+            // i don't know whether we` should send the request again or ignore.
         }
     }
     free(request_buffer);

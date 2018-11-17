@@ -16,14 +16,6 @@
 // input regex.
 static const string REGEX_GET_POST = "((GET|POST)\s\/(.+)\s(HTTP.+))";
 
-
-/*
- * Client call this function to receive response from the serevr.
- */
-void receiveResponse(){
-
-}
-
 /*
  * Server call this function to respond to any request from client.
  */
@@ -73,7 +65,6 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
         perror("invalid file to write in");
         return;
     }
-
 
     int data_start_position, data_content_length;
     for(int i=0; i < request_size; i++){
@@ -138,6 +129,7 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
     free(file_url);
     free(content_buffer);
 }
+
 
 /**
  *
@@ -234,6 +226,98 @@ void sendFile(FILE* file, int client) {
         printf("send failed with error: %d\n");
         closesocket(client);
     }
-
     cout << "Total bytes send: " << iResult << endl;
+}
+
+
+/*
+ * Client call this function to receive GET response from the server.
+ * actually before that call the server finished calling recieveGETRequest so
+ * so the client socket will have the file content.
+ */
+void receiveGETResponse(int client_socketfd, char * filename){
+    char * buffer = (char *) malloc(10000);
+    int status = recv(client_socketfd, buffer, 10000, 0);
+    if(status < 0){
+        perror("error receiving packages");
+        free(buffer);
+        return;
+    }
+    // parsing the response
+    int resp;
+    sscanf(buffer, "HTTP/1.1 %d",&resp);
+    printf("response from server = %d\n",response);
+    if(resp != 200){
+        puts(buffer);
+        //TODO how to display not found file ???
+        free(buffer);
+        return;
+    }
+
+    int response_size = status;
+    char *response = buffer;
+    int data_start_position, data_content_length;
+    for(int i=0; i < response_size; i++){
+        if(i > 2){
+            if(strncmp(response + i - 3, "\n\r\n\r", 4) == 0){
+                data_start_position = i+1;
+            }
+        }
+    }
+    int cur_index = -1, last_index = -1;
+    for(int i =0 ; i < response ; i++){
+        if(i > 1){
+            if(response[i] == '\n' && response[i-1] == '\r'){
+                if(cur_index == -1){
+                    cur_index = i-2;
+                }else{
+                    last_index = cur_index + 3;
+                    cur_index = i - 2;
+                    int flag = 1;
+                    char * str = "Content-Length: ";
+                    for(int idx=0 ; str[idx] != 0 && response[idx + last] != 0 ; idx++){
+                        if(response[idx + last] != str[idx]) {
+                            flag = 0;
+                            break;
+                        }
+                    }
+                    if(flag == 1){
+                        data_content_length = 0;
+                        int numbers_index = last_index + 16;
+                        while(response[numbers_index] >= '0' && response[numbers_index] <= '9'){
+                            data_content_length *= 10;
+                            numbers_index += (response[numbers_index] - '0');
+                            numbers_index++;
+                        }
+                        goto finished;
+                    }
+                }
+            }
+        }
+    }
+    data_content_length = -1;
+
+    finished:
+    if(data_content_length <= 0){
+        perror("Invalid GET RESPONSE As not content exist in the response");
+        return;
+    }
+    /*open new file */
+    FILE * fp = fopen(filename, "wb");
+    if(!fp){
+        perror("Client could not write the response to the file");
+        return;
+    }
+    printf("Client is writing the data content = %d into the file %s\n",data_content_length, filename);
+
+    char * file_buffer = (char *)malloc(data_content_length);
+    for(int current_index = 0; indx < response_size - data_start_position; current_index++){
+        file_buffer[current_index] = response[current_index + data_start_position];
+    }
+    fwrite(file_buffer, data_content_length, 1, fp);
+    fclose(fp);
+    free(file_buffer);
+    free(response);
+    free(buffer);
+    return;
 }
