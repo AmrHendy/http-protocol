@@ -4,6 +4,7 @@
 
 #include "sender.h"
 #include "client.h"
+#include "receiver.h"
 
 const long long TIMEOUT = 5LL:
 
@@ -13,7 +14,7 @@ void sendRequest(requestType type, char* hostname, char * port_number, char * fi
         sendGETRequest(hostname, port_number, file_url, client_socketfd);
         // server will respond to the client with success and content of desired file
         // or failed 404 Not Found
-
+        receiveGETResponse(client_socketfd, file_url);
     }
     else if(type == POST){
         sendPOSTRequest();
