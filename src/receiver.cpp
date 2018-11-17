@@ -16,26 +16,14 @@ void receiveRequest(char *request, int request_size, int client_socketfd) {
         string tmp(request);
         receiveGETRequest(tmp, client_socketfd);
     } else if (strncmp(request, "POST", 4) == 0) {
+        sleep(4);
         receivePOSTRequest(request, request_size, client_socketfd);
+        cout << "recieved."<< endl;
     } else {
         perror("unsupported type request");
     }
 }
 
-/*
-void receiveRequest(int request_size, int client_socketfd){
-    //TODO:: I see that we don't need char *request.
-
-    char buffer[request_size] = {0};
-    int val_read = read( new_socket , buffer, request_size);
-    string req_str(buffer);
-    string req = parse_req(req_str, 1);
-    if(req == "GET"){
-        receiveGetRequest(req_str);
-    }else if(req == "POST"){
-    }
-}
-*/
 
 /*
  * Server call this function to respond to GET request from client.
@@ -53,9 +41,8 @@ void receiveGETRequest(string req_str, int client){
  * Server call this function to respond to POST request from client.
  */
 void receivePOSTRequest(char *post_request, int request_size, int client_socketfd){
-    const int MAX_SIZE = 1000;
-    char *file_url = (char *)malloc(sizeof(MAX_SIZE));
-    sscanf(post_request, "POST %S", file_url);
+    const int MAX_SIZE = 50000;
+    char* file_url = strdup(parse_req(post_request, 2).c_str());
     if(file_url == NULL) {
         perror("invalid file to write in");
         return;
@@ -64,40 +51,29 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
     int data_start_position, data_content_length;
     for(int i=0; i < request_size; i++){
         if(i > 2){
-            if(strncmp(post_request + i - 3, "\n\r\n\r", 4) == 0){
+            if(strncmp(post_request + i - 3, "\r\n\r\n", 4) == 0){
                 data_start_position = i+1;
             }
         }
     }
-    int cur_index = -1, last_index = -1;
     for(int i =0 ; i < request_size ; i++){
-        if(i > 1){
-            if(post_request[i] == '\n' && post_request[i-1] == '\r'){
-                if(cur_index == -1){
-                    cur_index = i-2;
-                }else{
-                    last_index = cur_index + 3;
-                    cur_index = i - 2;
-                    int flag = 1;
-                    char * str = "Content-Length: ";
-                    for(int idx=0 ; str[idx] != 0 && post_request[idx + last_index] != 0 ; idx++){
-                        if(post_request[idx + last_index] != str[idx]) {
-                            flag = 0;
-                            break;
-                        }
-                    }
-                    if(flag == 1){
-                        data_content_length = 0;
-                        int numbers_index = last_index + 16;
-                        while(post_request[numbers_index] >= '0' && post_request[numbers_index] <= '9'){
-                            data_content_length *= 10;
-                            numbers_index += (post_request[numbers_index] - '0');
-                            numbers_index++;
-                        }
-                        goto finished;
-                    }
-                }
+        int flag = 1;
+        char * str = "Content-Length: ";
+        for(int idx=0 ; str[idx] != 0 && post_request[idx + i] != 0 ; idx++){
+            if(post_request[idx + i] != str[idx]) {
+                flag = 0;
+                break;
             }
+        }
+        if(flag == 1){
+            data_content_length = 0;
+            int numbers_index = i + 16;
+            while(post_request[numbers_index] >= '0' && post_request[numbers_index] <= '9'){
+                data_content_length *= 10;
+                data_content_length += (post_request[numbers_index] - '0');
+                numbers_index++;
+            }
+            goto finished;
         }
     }
     data_content_length = -1;
@@ -108,11 +84,12 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
         return;
     }
 
-    FILE * fp = fopen(file_url, "wb+");
+    FILE * fp = fopen(file_url, "wb");
     if(!fp || fp == NULL){
         perror("Error, Could not write to file");
         return;
     }
+
     // Write all data content in this buffer then to the file.
     char * content_buffer = (char *)malloc(data_content_length);
     for(int current_index = 0; current_index < request_size - data_start_position; current_index++){
@@ -121,10 +98,9 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
     // Write the file
     fwrite(content_buffer, data_content_length, 1, fp);
     fclose(fp);
-    free(file_url);
-    free(content_buffer);
+    if(!file_url) free(file_url);
+    if(!content_buffer) free(content_buffer);
 }
-
 
 /**
  *
@@ -320,9 +296,22 @@ void receiveGETResponse(int client_socketfd, char * filename) {
     printf("Client is writing the data content = %d into the file %s\n",data_content_length, filename);
 
     char * file_buffer = (char *)malloc(data_content_length);
+	int current_index = 0;
+	// we may not recieve all the data content completely if the data content is large.
+	for(; current_index < response_size - data_start_position; current_index++){
+        file_buffer[current_index] = response[current_index + data_start_position];
+    }
+	// continue reading until we finish reading all the content
+	while(data_content_length - current_index > 1){
+		response_size = recv(client_socketfd, (char *)(file_buffer + current_index), data_content_length - current_index, 0);
+		current_index += response_size;
+	}
+	/* 
+    char * file_buffer = (char *)malloc(data_content_length);
     for(int current_index = 0; cur_index < response_size - data_start_position; current_index++){
         file_buffer[current_index] = response[current_index + data_start_position];
     }
+    */
     fwrite(file_buffer, data_content_length, 1, fp);
     fclose(fp);
     free(file_buffer);
