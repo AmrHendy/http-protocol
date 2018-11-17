@@ -5,8 +5,8 @@
 #include "receiver.h"
 
 
-// input regex.
-static const string REGEX_GET_POST = "((GET|POST)\\s/(.+)\\s(HTTP.+))";
+// input regex. "GET /index.html HTTP/1.1\r\nHOST: 0.0.0.0:2000\r\n\r\n"
+static const string REGEX_GET_POST = "((GET|POST)\\s/(.+)\\s(HTTP.+)\\r\\n(.+).*?)";
 
 /*
  * Server call this function to respond to any request from client.
@@ -44,7 +44,9 @@ void receiveRequest(int request_size, int client_socketfd){
 void receiveGETRequest(string req_str, int client){
     //TODO:: I changed this to string as i see that we don't need to read it again.
     string file_path = parse_req(req_str, 2);
+    cout << file_path << endl;
     openFileWithPathAndSend(file_path, client);
+    cout << "File sent and function returned." << endl;
 }
 
 /*
@@ -132,13 +134,15 @@ void receivePOSTRequest(char *post_request, int request_size, int client_socketf
  */
 
 string parse_req(string p_toParse, int order_of_returned_str) {
-    regex rx(REGEX_GET_POST);
-    string extractedSubmatchPath = { "" };
-
-    std::smatch pieces_match;
-    if (std::regex_match(p_toParse, pieces_match, rx)) {
-        std::ssub_match sub_match = pieces_match[order_of_returned_str];
-        extractedSubmatchPath = sub_match.str();
+    istringstream s(p_toParse);
+    string extractedSubmatchPath;
+    if(order_of_returned_str == 1){
+        s >> extractedSubmatchPath;
+        return extractedSubmatchPath;
+    }else if(order_of_returned_str == 2){
+        s >> extractedSubmatchPath;
+        s >> extractedSubmatchPath;
+        return extractedSubmatchPath;
     }
     return extractedSubmatchPath;
 }
@@ -150,10 +154,9 @@ string parse_req(string p_toParse, int order_of_returned_str) {
  */
 void openFileWithPathAndSend(string file_path, int client) {
     FILE* file;
-    int err;
-    file = fopen(file_path.c_str(), "r");
+    file = fopen(file_path.substr(1, file_path.size()).c_str(), "rb");
 
-    if (err == 0)//if i found the file i can send it back to browser
+    if (file)//if i found the file i can send it back to browser
     {
         cout << "The file :" << file_path << " was opened." << endl;
         sendFile(file, client);
@@ -161,22 +164,14 @@ void openFileWithPathAndSend(string file_path, int client) {
     }
     else//i didnt find the file i have to send 404 page not found
     {
-        string responseNotFound = "HTTP/1.0 404 Not Found \r\n";
+        string responseNotFound = "HTTP/1.1 404 Not Found \r\n";
         cout << "File not found." << endl;
         send(client, responseNotFound.c_str(), (int)responseNotFound.size(), 0);
     }
 
     if (file)//if i opened the file i have to close it
     {
-        err = fclose(file);
-        if (err == 0)
-        {
-            printf("The file was closed\n");
-        }
-        else
-        {
-            printf("The file was not closed\n");
-        }
+        fclose(file);
     }
 }
 
@@ -188,7 +183,8 @@ void openFileWithPathAndSend(string file_path, int client) {
 
 void sendFile(FILE* file, int client) {
     //TODO:: add Content-type.
-    char statusLine[] = "HTTP/1.0 200 OK\r\n";
+    char statusLine[] = "HTTP/1.1 200 OK\r\n";
+
 
     //get file size.
     fseek(file, 0, SEEK_END);
@@ -201,24 +197,44 @@ void sendFile(FILE* file, int client) {
 
     //this reads whole file into buffer.
     int numRead = fread(myBufferedFile.get(), sizeof(char), bufferSize, file);
+    //bufferSize = numRead;
 
-    int totalSend = bufferSize + strlen(statusLine);
+    int totalSend = bufferSize;
 
-    unique_ptr<char[]> myUniqueBufferToSend = make_unique<char[]>(totalSend);
+    string content_len = "Content-Length: " + to_string(totalSend) + "\r\n\r\n";
+    cout << statusLine << endl;
+    cout << content_len << endl;
+    char tmp[content_len.size()];
+    for(int i=0 ;i < content_len.size(); i++){
+        tmp[i] = content_len[i];
+    }
+
+    unique_ptr<char[]> myUniqueBufferToSend = make_unique<char[]>(strlen(statusLine) + content_len.size() + bufferSize);
 
     //add status line.
     memcpy(myUniqueBufferToSend.get(), &statusLine, strlen(statusLine));
+    //add status line.
+    memcpy(myUniqueBufferToSend.get() + strlen(statusLine), &tmp, content_len.size());
     //add data.
-    memcpy(myUniqueBufferToSend.get() + strlen(statusLine), myBufferedFile.get(), bufferSize);
+    memcpy(myUniqueBufferToSend.get() + strlen(statusLine) + content_len.size(), myBufferedFile.get(), bufferSize);
+    //memcpy(myUniqueBufferToSend.get() + strlen(statusLine), myBufferedFile.get(), bufferSize);
 
     cout << "Sending response." << endl;
-    int iResult = send(client, myUniqueBufferToSend.get(), totalSend, 0);
+    cout << "start of data at " << strlen(statusLine) + content_len.size() << endl;
+    int iResult = send(client, myUniqueBufferToSend.get(), strlen(statusLine) + strlen(tmp) + bufferSize, 0);
 
+    /*
+    FILE * ffp;
+    ffp = fopen ("tmpp.png", "wb");
+    fwrite(myBufferedFile.get(), bufferSize, 1, ffp);
+    fclose(ffp);
+    */
     if (iResult == -1) {
         printf("send failed with error: %d\n");
         close(client);
 
     }
+
     cout << "Total bytes send: " << iResult << endl;
 }
 

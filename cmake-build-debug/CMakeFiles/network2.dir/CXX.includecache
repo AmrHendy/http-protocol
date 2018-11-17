@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/arsanuos/network2/src/receiver.cpp
+receiver.h
+/home/arsanuos/network2/src/receiver.h
+
 /home/arsanuos/network2/src/receiver.h
 regex
 -
@@ -31,30 +35,4 @@ netinet/in.h
 -
 unistd.h
 -
-
-/home/arsanuos/network2/src/server.cpp
-server.h
-/home/arsanuos/network2/src/server.h
-sys/socket.h
--
-sys/types.h
--
-netinet/in.h
--
-unistd.h
--
-stdio.h
--
-stdlib.h
--
-string.h
--
-thread
--
-mutex
--
-
-/home/arsanuos/network2/src/server.h
-receiver.h
-/home/arsanuos/network2/src/receiver.h
 

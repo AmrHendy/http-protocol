@@ -36,7 +36,7 @@ void handle_connection(int client_fd){
 
     const int request_size = 10000;
     char* buffer = (char*) malloc(request_size);
-    int val_read = read(client_fd , buffer, request_size);;
+    int val_read = read(client_fd , buffer, request_size);
     receiveRequest(buffer, val_read, client_fd);
 
     mtx.lock();
@@ -73,7 +73,7 @@ void start_server(int port_number){
          *    handle the connection, by creating new thread and send it all the information needed
          *    and the function which will handle the connection
          */
-        printf("Thread Started.");
+        printf("Thread Started.\n");
 
         std::thread t(handle_connection, client);
         t.detach();//this will allow the thread run on its own see join function in docs for more information
