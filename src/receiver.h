@@ -15,4 +15,14 @@ void receiveResponse();
  */
 void receiveRequest(char *request, int request_size, int client_socketfd);
 
+/*
+ * Server call this function to respond to GET request from client.
+ */
+void receiveGETRequest(char *get_request, int request_size, int client_socketfd);
+
+/*
+ * Server call this function to respond to POST request from client.
+ */
+void receivePOSTRequest(char *get_request, int request_size, int client_socketfd);
+
 #endif //RECEIVER_H
