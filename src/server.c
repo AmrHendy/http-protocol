@@ -32,6 +32,7 @@ void handle_connection(int child_port_number, int client_fd){
 
 
 void start_server(int port_number){
+    initServer(port_number);
     int status;
     /* start listening on this port */
     status = listen(server_socketfd, SERVER_CONNECTION_QUEUE_SIZE);

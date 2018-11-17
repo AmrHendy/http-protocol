@@ -4,9 +4,8 @@
 
 #ifndef SERVER_H
 #define SERVER_H
-#define "status.h"
 
-void initServer();
+void initServer(int port_number);
 
-void StartServer();
+void StartServer(int port_number);
 #endif //SERVER_H
