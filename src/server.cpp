@@ -32,11 +32,11 @@ int clients;
 std::mutex mtx;
 
 //TODO check that with arsanous  (argument ? void*) (close thread ?) (where receving buufer ? )
-void handle_connection(int client_fd){
+void handle_connection(int client_fd) {
 
     const int request_size = 10000;
     char* buffer = (char*) malloc(request_size);
-    int val_read = read(client_fd , buffer, request_size);
+    int val_read = recv(client_fd , buffer, request_size, MSG_PEEK);
     receiveRequest(buffer, val_read, client_fd);
 
     mtx.lock();

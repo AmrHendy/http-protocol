@@ -8,17 +8,18 @@
 // input regex. "GET /index.html HTTP/1.1\r\nHOST: 0.0.0.0:2000\r\n\r\n"
 static const string REGEX_GET_POST = "((GET|POST)\\s/(.+)\\s(HTTP.+)\\r\\n(.+).*?)";
 
+std::mutex hendy_mutex;
+
 /*
  * Server call this function to respond to any request from client.
  */
 void receiveRequest(char *request, int request_size, int client_socketfd) {
     if (strncmp(request, "GET", 3) == 0) {
         string tmp(request);
-        receiveGETRequest(tmp, client_socketfd);
+        receiveGETRequest(client_socketfd);
     } else if (strncmp(request, "POST", 4) == 0) {
-        sleep(4);
-        receivePOSTRequest(request, request_size, client_socketfd);
-        cout << "recieved."<< endl;
+        receivePOSTRequest(client_socketfd);
+        cout << "received."<< endl;
     } else {
         perror("unsupported type request");
     }
@@ -29,78 +30,17 @@ void receiveRequest(char *request, int request_size, int client_socketfd) {
  * Server call this function to respond to GET request from client.
  */
 
-void receiveGETRequest(string req_str, int client){
-    //TODO:: I changed this to string as i see that we don't need to read it again.
-    string file_path = parse_req(req_str, 2);
+void receiveGETRequest(int client){
+    const int request_size = 10000;
+    char* buffer = (char*) malloc(request_size);
+    int val_read = read(client , buffer, request_size);
+    string request(buffer);
+    string file_path = parse_req(request, 2);
     cout << file_path << endl;
     openFileWithPathAndSend(file_path, client);
     cout << "File sent and function returned." << endl;
 }
 
-/*
- * Server call this function to respond to POST request from client.
- */
-void receivePOSTRequest(char *post_request, int request_size, int client_socketfd){
-    const int MAX_SIZE = 50000;
-    char* file_url = strdup(parse_req(post_request, 2).c_str());
-    if(file_url == NULL) {
-        perror("invalid file to write in");
-        return;
-    }
-
-    int data_start_position, data_content_length;
-    for(int i=0; i < request_size; i++){
-        if(i > 2){
-            if(strncmp(post_request + i - 3, "\r\n\r\n", 4) == 0){
-                data_start_position = i+1;
-            }
-        }
-    }
-    for(int i =0 ; i < request_size ; i++){
-        int flag = 1;
-        char * str = "Content-Length: ";
-        for(int idx=0 ; str[idx] != 0 && post_request[idx + i] != 0 ; idx++){
-            if(post_request[idx + i] != str[idx]) {
-                flag = 0;
-                break;
-            }
-        }
-        if(flag == 1){
-            data_content_length = 0;
-            int numbers_index = i + 16;
-            while(post_request[numbers_index] >= '0' && post_request[numbers_index] <= '9'){
-                data_content_length *= 10;
-                data_content_length += (post_request[numbers_index] - '0');
-                numbers_index++;
-            }
-            goto finished;
-        }
-    }
-    data_content_length = -1;
-
-    finished:
-    if(data_content_length <= 0){
-        perror("Invalid Request As No Content is sent in POST request");
-        return;
-    }
-
-    FILE * fp = fopen(file_url, "wb");
-    if(!fp || fp == NULL){
-        perror("Error, Could not write to file");
-        return;
-    }
-
-    // Write all data content in this buffer then to the file.
-    char * content_buffer = (char *)malloc(data_content_length);
-    for(int current_index = 0; current_index < request_size - data_start_position; current_index++){
-        content_buffer[current_index] = post_request[current_index + data_start_position];
-    }
-    // Write the file
-    fwrite(content_buffer, data_content_length, 1, fp);
-    fclose(fp);
-    if(!file_url) free(file_url);
-    if(!content_buffer) free(content_buffer);
-}
 
 /**
  *
@@ -134,9 +74,14 @@ void openFileWithPathAndSend(string file_path, int client) {
 
     if (file)//if i found the file i can send it back to browser
     {
+        string tmp("HTTP/1.1 200 OK\r\nContent-Length: " + to_string(getFileLength(file)) + "\r\n\r\n");
+        char statusLine[tmp.size() + 1];
+        for(int i = 0 ;i < tmp.size(); i++){
+            statusLine[i] = tmp[i];
+        }
+        statusLine[tmp.size()] = '\0';
         cout << "The file :" << file_path << " was opened." << endl;
-        sendFile(file, client);
-
+        sendFile(file, client, statusLine);
     }
     else//i didnt find the file i have to send 404 page not found
     {
@@ -151,16 +96,16 @@ void openFileWithPathAndSend(string file_path, int client) {
     }
 }
 
-/**
- *
- * @param file => file to send
- * @param client => client socket
- */
 
-void sendFile(FILE* file, int client) {
-    //TODO:: add Content-type.
-    char statusLine[] = "HTTP/1.1 200 OK\r\n";
 
+
+// status line without Conetnt-Length Header
+void sendFile(FILE* file, int client, char status_line[]) {
+
+    char statusLine[strlen(status_line)];
+    for(int i = 0 ;i < strlen(status_line); i++){
+        statusLine[i] = status_line[i];
+    }
 
     //get file size.
     fseek(file, 0, SEEK_END);
@@ -173,38 +118,19 @@ void sendFile(FILE* file, int client) {
 
     //this reads whole file into buffer.
     int numRead = fread(myBufferedFile.get(), sizeof(char), bufferSize, file);
-    //bufferSize = numRead;
-
     int totalSend = bufferSize;
 
-    string content_len = "Content-Length: " + to_string(totalSend) + "\r\n\r\n";
-    cout << statusLine << endl;
-    cout << content_len << endl;
-    char tmp[content_len.size()];
-    for(int i=0 ;i < content_len.size(); i++){
-        tmp[i] = content_len[i];
-    }
-
-    unique_ptr<char[]> myUniqueBufferToSend = make_unique<char[]>(strlen(statusLine) + content_len.size() + bufferSize);
+    unique_ptr<char[]> myUniqueBufferToSend = make_unique<char[]>(strlen(status_line) + bufferSize);
 
     //add status line.
-    memcpy(myUniqueBufferToSend.get(), &statusLine, strlen(statusLine));
-    //add status line.
-    memcpy(myUniqueBufferToSend.get() + strlen(statusLine), &tmp, content_len.size());
+    memcpy(myUniqueBufferToSend.get(), &statusLine, strlen(status_line));
     //add data.
-    memcpy(myUniqueBufferToSend.get() + strlen(statusLine) + content_len.size(), myBufferedFile.get(), bufferSize);
+    memcpy(myUniqueBufferToSend.get() + strlen(status_line), myBufferedFile.get(), bufferSize);
     //memcpy(myUniqueBufferToSend.get() + strlen(statusLine), myBufferedFile.get(), bufferSize);
 
-    cout << "Sending response." << endl;
-    cout << "start of data at " << strlen(statusLine) + content_len.size() << endl;
-    int iResult = send(client, myUniqueBufferToSend.get(), strlen(statusLine) + strlen(tmp) + bufferSize, 0);
-
-    /*
-    FILE * ffp;
-    ffp = fopen ("tmpp.png", "wb");
-    fwrite(myBufferedFile.get(), bufferSize, 1, ffp);
-    fclose(ffp);
-    */
+    cout << "Sending File and headers" << endl;
+    cout << "start of data at " << strlen(status_line) << endl;
+    int iResult = send(client, myUniqueBufferToSend.get(), strlen(status_line) + bufferSize, 0);
     if (iResult == -1) {
         printf("send failed with error: %d\n");
         close(client);
@@ -214,108 +140,133 @@ void sendFile(FILE* file, int client) {
     cout << "Total bytes send: " << iResult << endl;
 }
 
-
-/*
- * Client call this function to receive GET response from the server.
- * actually before that call the server finished calling recieveGETRequest so
- * so the client socket will have the file content.
- */
-void receiveGETResponse(int client_socketfd, char * filename) {
-    char * buffer = (char *) malloc(10000);
-    int status = recv(client_socketfd, buffer, 10000, 0);
-    if(status < 0){
-        perror("error receiving packages");
-        free(buffer);
-        return;
-    }
-    // parsing the response
-    int resp;
-    sscanf(buffer, "HTTP/1.1 %d",&resp);
-    char *response = buffer;
-    printf("response from server = %d\n",resp);
-    if(resp != 200){
-        puts(buffer);
-        //TODO how to display not found file ???
-        free(buffer);
-        return;
-    }
-
-    int response_size = status;
-    int data_start_position, data_content_length;
-    for(int i=0; i < response_size; i++){
+void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length){
+    for(int i=0; i < buffer_size; i++){
         if(i > 2){
-            if(strncmp(response + i - 3, "\n\r\n\r", 4) == 0){
+            if(strncmp(buffer + i - 3, "\r\n\r\n", 4) == 0){
                 data_start_position = i+1;
             }
         }
     }
-    int cur_index = -1, last_index = -1;
-    for(int i =0 ; i < response_size ; i++){
-        if(i > 1){
-            if(response[i] == '\n' && response[i-1] == '\r'){
-                if(cur_index == -1){
-                    cur_index = i-2;
-                }else{
-                    last_index = cur_index + 3;
-                    cur_index = i - 2;
-                    int flag = 1;
-                    char * str = "Content-Length: ";
-                    for(int idx=0 ; str[idx] != 0 && response[idx + last_index] != 0 ; idx++){
-                        if(response[idx + last_index] != str[idx]) {
-                            flag = 0;
-                            break;
-                        }
-                    }
-                    if(flag == 1){
-                        data_content_length = 0;
-                        int numbers_index = last_index + 16;
-                        while(response[numbers_index] >= '0' && response[numbers_index] <= '9'){
-                            data_content_length *= 10;
-                            numbers_index += (response[numbers_index] - '0');
-                            numbers_index++;
-                        }
-                        goto finished;
-                    }
-                }
+    for(int i =0 ; i < buffer_size; i++){
+        int flag = 1;
+        char * str = "Content-Length: ";
+        for(int idx=0 ; str[idx] != 0 && buffer[idx + i] != 0 ; idx++){
+            if(buffer[idx + i] != str[idx]) {
+                flag = 0;
+                break;
             }
+        }
+        if(flag == 1){
+            data_content_length = 0;
+            int numbers_index = i + 16;
+            while(buffer[numbers_index] >= '0' && buffer[numbers_index] <= '9'){
+                data_content_length *= 10;
+                data_content_length += (buffer[numbers_index] - '0');
+                numbers_index++;
+            }
+            return;
         }
     }
     data_content_length = -1;
+    return;
+}
 
-    finished:
+
+
+
+void receivePOSTRequest(int client_socketfd) {
+    const int MAX_SIZE = 500000;
+    char * buffer = (char *) malloc(MAX_SIZE);
+
+    /*   START MUTEX */
+    //hendy_mutex.lock();
+    // read the first part to parse the file url, and not advancing the socket pointer
+    int status = recv(client_socketfd, buffer, MAX_SIZE, 0);
+    if(status < 0){
+        perror("error receiving packages");
+        if(!buffer){
+            free(buffer);
+        }
+        return;
+    }
+    string req(buffer);
+    char *file_url = strdup(parse_req(req, 2).c_str());
+
+    if(file_url == NULL) {
+        perror("invalid file to write in");
+        return;
+    }
+    int data_start_position, data_content_length;
+    parse_data_from_file(buffer, status, data_start_position, data_content_length);
+    // we should not enter that condition unless failure occur.
     if(data_content_length <= 0){
-        perror("Invalid GET RESPONSE As not content exist in the response");
+        perror("Invalid POST REQUEST IN SERVER As content not exist in the request");
         return;
     }
-    /*open new file */
-    FILE * fp = fopen(filename, "wb");
-    if(!fp){
-        perror("Client could not write the response to the file");
-        return;
-    }
-    printf("Client is writing the data content = %d into the file %s\n",data_content_length, filename);
 
-    char * file_buffer = (char *)malloc(data_content_length);
-	int current_index = 0;
-	// we may not recieve all the data content completely if the data content is large.
-	for(; current_index < response_size - data_start_position; current_index++){
-        file_buffer[current_index] = response[current_index + data_start_position];
+    /* call here send post respone which include OK. */
+    string OkResponse = "HTTP/1.1 200 OK\r\n";
+    sendBufferToSocket(strdup(OkResponse.c_str()), OkResponse.size(),client_socketfd);
+    // receive the file conetent after the client respond parse the request to get the data
+    status = recv(client_socketfd, buffer, data_start_position + data_content_length, 0);
+    if(status <= 0){
+        perror("Very long waiting for file to be sent.\n");
     }
-	// continue reading until we finish reading all the content
-	while(data_content_length - current_index > 1){
-		response_size = recv(client_socketfd, (char *)(file_buffer + current_index), data_content_length - current_index, 0);
-		current_index += response_size;
-	}
-	/* 
     char * file_buffer = (char *)malloc(data_content_length);
-    for(int current_index = 0; cur_index < response_size - data_start_position; current_index++){
-        file_buffer[current_index] = response[current_index + data_start_position];
+    int current_index = 0;
+    // we may not recieve all the data content completely if the data content is large.
+    for(; current_index < status ; current_index++){
+        file_buffer[current_index] = buffer[current_index];
     }
-    */
+    // continue reading until we finish reading all the content
+    while(data_content_length - current_index > 1){
+        status = recv(client_socketfd, (char *)(file_buffer + current_index), data_content_length - current_index, 0);
+        current_index += status;
+    }
+    //hendy_mutex.unlock();
+    /*   END MUTEX */
+
+
+    /*open new file */
+    FILE * fp = fopen(file_url, "wb");
+    if(!fp){
+        perror("Server could not write the response to the file");
+        return;
+    }
+    printf("Server is writing the data content = %d into the file %s\n",data_content_length, file_url);
     fwrite(file_buffer, data_content_length, 1, fp);
     fclose(fp);
-    free(file_buffer);
-    free(response);
-    free(buffer);
+    if(!file_buffer){
+        free(file_buffer);
+    }
+    if(!buffer){
+        free(buffer);
+    }
     return;
+}
+
+/* sends buffer of chars over socket */
+int sendBufferToSocket(char *buffer, int buffer_size, int socketfd) {
+
+    int sent = 0;
+    const long long TIMEOUT = 5LL;
+    clock_t curTime = clock();
+    // checking Timeout as socket may fail for many many times so we will stop trying to repeat.
+    while(sent < buffer_size && (clock() - curTime)/CLOCKS_PER_SEC < TIMEOUT){
+        sent += send(socketfd, (void *)(buffer + sent), buffer_size - sent, 0);
+    }
+    if(sent != buffer_size) {
+        // then that means not all characters are sent because of timeout */
+        return 0;
+    }
+    return 1;
+}
+
+/* return file size */
+int getFileLength(FILE * fp){
+    fseek(fp, 0, SEEK_END);
+    int x = ftell(fp);
+    rewind(fp);
+    return x;
 }

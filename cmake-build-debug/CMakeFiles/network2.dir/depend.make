@@ -8,10 +8,6 @@ CMakeFiles/network2.dir/main.cpp.o: ../src/server.h
 CMakeFiles/network2.dir/src/receiver.cpp.o: ../src/receiver.cpp
 CMakeFiles/network2.dir/src/receiver.cpp.o: ../src/receiver.h
 
-CMakeFiles/network2.dir/src/sender.cpp.o: ../src/receiver.h
-CMakeFiles/network2.dir/src/sender.cpp.o: ../src/sender.cpp
-CMakeFiles/network2.dir/src/sender.cpp.o: ../src/sender.h
-
 CMakeFiles/network2.dir/src/server.cpp.o: ../src/receiver.h
 CMakeFiles/network2.dir/src/server.cpp.o: ../src/server.cpp
 CMakeFiles/network2.dir/src/server.cpp.o: ../src/server.h

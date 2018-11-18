@@ -6,7 +6,6 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/arsanuos/network2/main.cpp" "/home/arsanuos/network2/cmake-build-debug/CMakeFiles/network2.dir/main.cpp.o"
   "/home/arsanuos/network2/src/receiver.cpp" "/home/arsanuos/network2/cmake-build-debug/CMakeFiles/network2.dir/src/receiver.cpp.o"
-  "/home/arsanuos/network2/src/sender.cpp" "/home/arsanuos/network2/cmake-build-debug/CMakeFiles/network2.dir/src/sender.cpp.o"
   "/home/arsanuos/network2/src/server.cpp" "/home/arsanuos/network2/cmake-build-debug/CMakeFiles/network2.dir/src/server.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

@@ -93,12 +93,6 @@
 		<Unit filename="/home/arsanuos/network2/src/receiver.h">
 			<Option target="network2"/>
 		</Unit>
-		<Unit filename="/home/arsanuos/network2/src/sender.cpp">
-			<Option target="network2"/>
-		</Unit>
-		<Unit filename="/home/arsanuos/network2/src/sender.h">
-			<Option target="network2"/>
-		</Unit>
 		<Unit filename="/home/arsanuos/network2/src/server.cpp">
 			<Option target="network2"/>
 		</Unit>

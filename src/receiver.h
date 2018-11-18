@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <mutex>
 
 using namespace std;
 
@@ -27,11 +28,13 @@ typedef enum {GET, POST, OTHER} requestType;
  * Server call this function to respond to any request from client.
  */
 void receiveRequest(char *request, int request_size, int client_socketfd);
-void receiveGETRequest(string req_str, int client);
-void receivePOSTRequest(char *post_request, int request_size, int client_socketfd);
+void receiveGETRequest(int client);
 string parse_req(string p_toParse, int order_of_returned_str);
-void openFileWithPathAndSend(string file_path, int client);
-void sendFile(FILE* file, int client);
-void receiveGETResponse(int client_socketfd, char * filename);
+void openFileWithPathAndSend(string file_path, int client);;
+void sendFile(FILE* file, int client, char status_line[]);
+void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length);
+void receivePOSTRequest(int client_socketfd);
+int sendBufferToSocket(char *buffer, int buffer_size, int socketfd);
+int getFileLength(FILE * fp);
 
 #endif //RECEIVER_H

@@ -8,10 +8,6 @@ CMakeFiles/network2.dir/main.cpp.o
 CMakeFiles/network2.dir/src/receiver.cpp.o
  /home/arsanuos/network2/src/receiver.cpp
  /home/arsanuos/network2/src/receiver.h
-CMakeFiles/network2.dir/src/sender.cpp.o
- /home/arsanuos/network2/src/receiver.h
- /home/arsanuos/network2/src/sender.cpp
- /home/arsanuos/network2/src/sender.h
 CMakeFiles/network2.dir/src/server.cpp.o
  /home/arsanuos/network2/src/receiver.h
  /home/arsanuos/network2/src/server.cpp

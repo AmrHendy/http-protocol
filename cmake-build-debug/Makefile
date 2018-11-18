@@ -177,33 +177,6 @@ src/receiver.cpp.s:
 	$(MAKE) -f CMakeFiles/network2.dir/build.make CMakeFiles/network2.dir/src/receiver.cpp.s
 .PHONY : src/receiver.cpp.s
 
-src/sender.o: src/sender.cpp.o
-
-.PHONY : src/sender.o
-
-# target to build an object file
-src/sender.cpp.o:
-	$(MAKE) -f CMakeFiles/network2.dir/build.make CMakeFiles/network2.dir/src/sender.cpp.o
-.PHONY : src/sender.cpp.o
-
-src/sender.i: src/sender.cpp.i
-
-.PHONY : src/sender.i
-
-# target to preprocess a source file
-src/sender.cpp.i:
-	$(MAKE) -f CMakeFiles/network2.dir/build.make CMakeFiles/network2.dir/src/sender.cpp.i
-.PHONY : src/sender.cpp.i
-
-src/sender.s: src/sender.cpp.s
-
-.PHONY : src/sender.s
-
-# target to generate assembly for a file
-src/sender.cpp.s:
-	$(MAKE) -f CMakeFiles/network2.dir/build.make CMakeFiles/network2.dir/src/sender.cpp.s
-.PHONY : src/sender.cpp.s
-
 src/server.o: src/server.cpp.o
 
 .PHONY : src/server.o
@@ -246,9 +219,6 @@ help:
 	@echo "... src/receiver.o"
 	@echo "... src/receiver.i"
 	@echo "... src/receiver.s"
-	@echo "... src/sender.o"
-	@echo "... src/sender.i"
-	@echo "... src/sender.s"
 	@echo "... src/server.o"
 	@echo "... src/server.i"
 	@echo "... src/server.s"
