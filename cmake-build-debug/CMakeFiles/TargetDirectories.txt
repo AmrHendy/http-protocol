@@ -1,3 +1,0 @@
-/home/arsanuos/network2/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/arsanuos/network2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/arsanuos/network2/cmake-build-debug/CMakeFiles/network2.dir
