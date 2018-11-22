@@ -7,8 +7,6 @@
 
 #include "receiver.h"
 
-
-void init_server(int port_number);
-
 void start_server(int port_number);
+
 #endif //SERVER_H
