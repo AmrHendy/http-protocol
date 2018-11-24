@@ -4,10 +4,15 @@
 
 #include "receiver.h"
 
+void openFileWithPathAndSend(string file_path, int client);
+void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length);
+void receiveGETRequest(int client);
+void receivePOSTRequest(int client_socketfd);
 
 // input regex. "GET /index.html HTTP/1.1\r\nHOST: 0.0.0.0:2000\r\n\r\n"
 static const string REGEX_GET_POST = "((GET|POST)\\s/(.+)\\s(HTTP.+)\\r\\n(.+).*?)";
 
+// TODO unused ??
 std::mutex hendy_mutex;
 
 /*
@@ -17,9 +22,10 @@ void receiveRequest(char *request, int request_size, int client_socketfd) {
     if (strncmp(request, "GET", 3) == 0) {
         string tmp(request);
         receiveGETRequest(client_socketfd);
+        cout << "Sent File Complete (Finished GET Request at Server)" << endl;
     } else if (strncmp(request, "POST", 4) == 0) {
         receivePOSTRequest(client_socketfd);
-        cout << "received."<< endl;
+        cout << "Received File Complete (Finished POST Request at Server)" << endl;
     } else {
         perror("unsupported type request");
     }
@@ -36,144 +42,8 @@ void receiveGETRequest(int client){
     int val_read = read(client , buffer, request_size);
     string request(buffer);
     string file_path = parse_req(request, 2);
-    cout << file_path << endl;
     openFileWithPathAndSend(file_path, client);
-    cout << "File sent and function returned." << endl;
 }
-
-
-/**
- *
- * @param p_toParse string to parse
- * @param order_of_returned_str = 1 for req type or 2 for file name.
- * @return if there is no match so the request is not HTTP it will return empty string
- */
-
-string parse_req(string p_toParse, int order_of_returned_str) {
-    istringstream s(p_toParse);
-    string extractedSubmatchPath;
-    if(order_of_returned_str == 1){
-        s >> extractedSubmatchPath;
-        return extractedSubmatchPath;
-    }else if(order_of_returned_str == 2){
-        s >> extractedSubmatchPath;
-        s >> extractedSubmatchPath;
-        return extractedSubmatchPath;
-    }
-    return extractedSubmatchPath;
-}
-
-/**
- *
- * @param file_path => file name
- * @param client => client socket
- */
-void openFileWithPathAndSend(string file_path, int client) {
-    FILE* file;
-    file = fopen(file_path.substr(1, file_path.size()).c_str(), "rb");
-
-    if (file)//if i found the file i can send it back to browser
-    {
-        string tmp("HTTP/1.1 200 OK\r\nContent-Length: " + to_string(getFileLength(file)) + "\r\n\r\n");
-        char statusLine[tmp.size() + 1];
-        for(int i = 0 ;i < tmp.size(); i++){
-            statusLine[i] = tmp[i];
-        }
-        statusLine[tmp.size()] = '\0';
-        cout << "The file :" << file_path << " was opened." << endl;
-        sendFile(file, client, statusLine);
-    }
-    else//i didnt find the file i have to send 404 page not found
-    {
-        string responseNotFound = "HTTP/1.1 404 Not Found \r\n";
-        cout << "File not found." << endl;
-        send(client, responseNotFound.c_str(), (int)responseNotFound.size(), 0);
-    }
-
-    if (file)//if i opened the file i have to close it
-    {
-        fclose(file);
-    }
-}
-
-
-
-
-// status line without Conetnt-Length Header
-void sendFile(FILE* file, int client, char status_line[]) {
-
-    char statusLine[strlen(status_line)];
-    for(int i = 0 ;i < strlen(status_line); i++){
-        statusLine[i] = status_line[i];
-    }
-
-    //get file size.
-    fseek(file, 0, SEEK_END);
-    int bufferSize = ftell(file);
-    cout << "The file lenght is :" << bufferSize << endl;;
-    rewind(file);
-
-    //this creates unique pointer to my array
-    unique_ptr<char[]> myBufferedFile = make_unique<char[]>(bufferSize);
-
-    //this reads whole file into buffer.
-    int numRead = fread(myBufferedFile.get(), sizeof(char), bufferSize, file);
-    int totalSend = bufferSize;
-
-    unique_ptr<char[]> myUniqueBufferToSend = make_unique<char[]>(strlen(status_line) + bufferSize);
-
-    //add status line.
-    memcpy(myUniqueBufferToSend.get(), &statusLine, strlen(status_line));
-    //add data.
-    memcpy(myUniqueBufferToSend.get() + strlen(status_line), myBufferedFile.get(), bufferSize);
-    //memcpy(myUniqueBufferToSend.get() + strlen(statusLine), myBufferedFile.get(), bufferSize);
-
-    cout << "Sending File and headers" << endl;
-    cout << "start of data at " << strlen(status_line) << endl;
-    int iResult = send(client, myUniqueBufferToSend.get(), strlen(status_line) + bufferSize, 0);
-    if (iResult == -1) {
-        printf("send failed with error: %d\n");
-        close(client);
-
-    }
-
-    cout << "Total bytes send: " << iResult << endl;
-}
-
-void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length){
-    for(int i=0; i < buffer_size; i++){
-        if(i > 2){
-            if(strncmp(buffer + i - 3, "\r\n\r\n", 4) == 0){
-                data_start_position = i+1;
-            }
-        }
-    }
-    for(int i =0 ; i < buffer_size; i++){
-        int flag = 1;
-        char * str = "Content-Length: ";
-        for(int idx=0 ; str[idx] != 0 && buffer[idx + i] != 0 ; idx++){
-            if(buffer[idx + i] != str[idx]) {
-                flag = 0;
-                break;
-            }
-        }
-        if(flag == 1){
-            data_content_length = 0;
-            int numbers_index = i + 16;
-            while(buffer[numbers_index] >= '0' && buffer[numbers_index] <= '9'){
-                data_content_length *= 10;
-                data_content_length += (buffer[numbers_index] - '0');
-                numbers_index++;
-            }
-            return;
-        }
-    }
-    data_content_length = -1;
-    return;
-}
-
-
-
 
 void receivePOSTRequest(int client_socketfd) {
     const int MAX_SIZE = 500000;
@@ -181,6 +51,7 @@ void receivePOSTRequest(int client_socketfd) {
 
     /*   START MUTEX */
     //hendy_mutex.lock();
+
     // read the first part to parse the file url, and not advancing the socket pointer
     int status = recv(client_socketfd, buffer, MAX_SIZE, 0);
     if(status < 0){
@@ -227,7 +98,6 @@ void receivePOSTRequest(int client_socketfd) {
     //hendy_mutex.unlock();
     /*   END MUTEX */
 
-
     /*open new file */
     FILE * fp = fopen(file_url, "wb");
     if(!fp){
@@ -246,27 +116,67 @@ void receivePOSTRequest(int client_socketfd) {
     return;
 }
 
-/* sends buffer of chars over socket */
-int sendBufferToSocket(char *buffer, int buffer_size, int socketfd) {
+/**
+ *
+ * @param file_path => file name
+ * @param client => client socket
+ */
+void openFileWithPathAndSend(string file_path, int client) {
+    FILE* file;
+    file = fopen(file_path.substr(1, file_path.size()).c_str(), "rb");
 
-    int sent = 0;
-    const long long TIMEOUT = 5LL;
-    clock_t curTime = clock();
-    // checking Timeout as socket may fail for many many times so we will stop trying to repeat.
-    while(sent < buffer_size && (clock() - curTime)/CLOCKS_PER_SEC < TIMEOUT){
-        sent += send(socketfd, (void *)(buffer + sent), buffer_size - sent, 0);
+    if (file)//if i found the file i can send it back to browser
+    {
+        string tmp("HTTP/1.1 200 OK\r\nContent-Length: " + to_string(getFileLength(file)) + "\r\n\r\n");
+        char statusLine[tmp.size() + 1];
+        for(int i = 0 ;i < tmp.size(); i++){
+            statusLine[i] = tmp[i];
+        }
+        statusLine[tmp.size()] = '\0';
+        //cout << "The file :" << file_path << " was opened." << endl;
+        sendFile(file, client, statusLine);
     }
-    if(sent != buffer_size) {
-        // then that means not all characters are sent because of timeout */
-        return 0;
+    else//i didnt find the file i have to send 404 page not found
+    {
+        string responseNotFound = "HTTP/1.1 404 Not Found \r\n";
+        cout << "File not found." << endl;
+        send(client, responseNotFound.c_str(), (int)responseNotFound.size(), 0);
     }
-    return 1;
+
+    if (file)//if i opened the file i have to close it
+    {
+        fclose(file);
+    }
 }
 
-/* return file size */
-int getFileLength(FILE * fp){
-    fseek(fp, 0, SEEK_END);
-    int x = ftell(fp);
-    rewind(fp);
-    return x;
+void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length){
+    for(int i=0; i < buffer_size; i++){
+        if(i > 2){
+            if(strncmp(buffer + i - 3, "\r\n\r\n", 4) == 0){
+                data_start_position = i+1;
+            }
+        }
+    }
+    for(int i =0 ; i < buffer_size; i++){
+        int flag = 1;
+        char * str = "Content-Length: ";
+        for(int idx=0 ; str[idx] != 0 && buffer[idx + i] != 0 ; idx++){
+            if(buffer[idx + i] != str[idx]) {
+                flag = 0;
+                break;
+            }
+        }
+        if(flag == 1){
+            data_content_length = 0;
+            int numbers_index = i + 16;
+            while(buffer[numbers_index] >= '0' && buffer[numbers_index] <= '9'){
+                data_content_length *= 10;
+                data_content_length += (buffer[numbers_index] - '0');
+                numbers_index++;
+            }
+            return;
+        }
+    }
+    data_content_length = -1;
+    return;
 }

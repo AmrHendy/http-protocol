@@ -12,7 +12,7 @@ int main(int argc, char** argv){
         printf("Invalid number of arguments\n");
         return;
     }
-    // TODO ?????
-   start_server(port_number);
+    printf("Starting Server, Server is waiting now for client connections\n");
+    start_server(atoi(argv[1]));
 }
 

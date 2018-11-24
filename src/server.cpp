@@ -23,26 +23,19 @@ using namespace std;
 // 3) if there is any connection then accept it and make a new thread handling this connection individually
 // 4) handle the connection
 
+void handle_request(int client_fd);
+int waitForRequest(int client_fd);
+void handle_connection(int client_fd);
+void init_server(int port_number);
 
 const int SERVER_CONNECTION_QUEUE_SIZE = 10;
+const int MAX_ALLOWED_CONNECTIONS = 20;
+const int MAX_ALLOWED_REQUESTS_PER_CONNECTION = 30;
 int server_socketfd;
 // number of clients can be used as counter to handle number of current connections.
 int clients;
 
 std::mutex mtx;
-
-//TODO check that with arsanous  (argument ? void*) (close thread ?) (where receving buufer ? )
-void handle_connection(int client_fd) {
-
-    const int request_size = 10000;
-    char* buffer = (char*) malloc(request_size);
-    int val_read = recv(client_fd , buffer, request_size, MSG_PEEK);
-    receiveRequest(buffer, val_read, client_fd);
-
-    mtx.lock();
-    clients--;
-    mtx.unlock();
-}
 
 
 void start_server(int port_number){
@@ -55,7 +48,7 @@ void start_server(int port_number){
         perror("error in listening");
         exit(EXIT_FAILURE);
     }
-    printf("server: waiting for connections, Let's start Amr (problem setter, problem solver, machine learning engineer and seeb el koos maftooh \n");
+    printf("Server is waiting for connections\n");
 
     struct sockaddr_storage client_addr;    /* client address info */
     socklen_t sock_size;
@@ -68,13 +61,16 @@ void start_server(int port_number){
             perror("accept error ");
             continue;
         }
-        printf("Successfully Established Connection with a Client \n");
+        printf("Successfully Established Connection with a Client has fd = %d \n",client);
         /*
          *    handle the connection, by creating new thread and send it all the information needed
          *    and the function which will handle the connection
          */
-        printf("Thread Started.\n");
-
+        printf("Thread Started for the new client.\n");
+        if(clients == MAX_ALLOWED_CONNECTIONS){
+            printf("Reached the max limit number of connections, So server can't handle that client connection\n")
+            continue
+        }
         std::thread t(handle_connection, client);
         t.detach();//this will allow the thread run on its own see join function in docs for more information
         clients++;
@@ -107,4 +103,52 @@ void init_server(int port_number){
         perror("bind failed");
         exit(EXIT_FAILURE);
     }
+}
+
+// Handle connection/client
+void handle_connection(int client_fd) {
+    // That thread will serve the single client
+    int requests_count = 0;
+    while(1){
+        // serving the requests
+        int status = waitForRequest(client_fd);
+        if(status == -1){
+            printf("No more requests from client with fd = %d within the last 5 seconds, So the server will close the client connection\n",client_fd);
+            break;
+        }
+        if(requests_count == MAX_ALLOWED_REQUESTS_PER_CONNECTION){
+            printf("Reached the max limit number of requests of the same connection, So server can't handle that request from the client\n")
+            break;
+        }
+        requests_count++;
+        handle_request(client_fd);
+        requests_count--;
+    }
+    mtx.lock();
+    clients--;
+    mtx.unlock();
+}
+
+// return status : 1 in case of received request or -1 in case of not receiving so timeout
+int waitForRequest(int client_fd){
+    struct timeval tv;
+    /* wait up to 5 seconds. */
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+    fd_set rfds;
+    FD_ZERO(&rfds);
+    FD_SET(client_fd, &rfds);
+    int retval = select(1, &rfds, NULL, NULL, &tv);
+    return (retval!= -1) ? 1 : -1;
+}
+
+// TODO will the requests run in separate thread / parallel or the same thread / sequential
+// TODO problems with multiple thread :
+// select will return true which means i have a new request but that is wrong as socket may recev data from old request also not new requests always
+// also we will need mutex for every fd , that mutex will be used as we use in receiver
+void handle_request(int client_fd){
+    const int request_size = 10000;
+    char* buffer = (char*) malloc(request_size);
+    int val_read = recv(client_fd , buffer, request_size, MSG_PEEK);
+    receiveRequest(buffer, val_read, client_fd);
 }
