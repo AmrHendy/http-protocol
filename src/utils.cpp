@@ -39,7 +39,7 @@ void sendFile(FILE* file, int client, char status_line[]) {
     //get file size.
     fseek(file, 0, SEEK_END);
     int bufferSize = ftell(file);
-    cout << "The file lenght is :" << bufferSize << endl;;
+    cout << "The file lenght is :" << bufferSize << endl;
     rewind(file);
 
     //this creates unique pointer to my array
@@ -59,13 +59,11 @@ void sendFile(FILE* file, int client, char status_line[]) {
 
     //cout << "Sending File and headers" << endl;
     //cout << "start of data at " << strlen(status_line) << endl;
-    int iResult = send(client, myUniqueBufferToSend.get(), strlen(status_line) + bufferSize, 0);
+    int iResult = send(client, myUniqueBufferToSend.get() , strlen(statusLine) + bufferSize , 0);
     if (iResult == -1) {
         printf("send failed with error: %d\n");
-        close(client);
-
     }
-    //cout << "Total bytes send: " << iResult << endl;
+    cout << "Total bytes send: " << iResult << endl;
 }
 
 /**

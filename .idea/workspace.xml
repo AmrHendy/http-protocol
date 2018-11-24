@@ -13,15 +13,8 @@
   <component name="ChangeListManager">
     <list default="true" id="3183c516-c795-4ecd-b183-534ac5c3e92a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeCache.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-environment.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-environment.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/network2.cbp" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/network2.cbp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/receiver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/receiver.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/server.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-debug/network2" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-debug/network2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -38,14 +31,16 @@
           <entry key="project.closed" value="8" />
           <entry key="project.open.time.1" value="2" />
           <entry key="project.open.time.2" value="3" />
+          <entry key="project.open.time.258" value="1" />
           <entry key="project.open.time.30" value="2" />
+          <entry key="project.open.time.35" value="1" />
           <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="8" />
+          <entry key="project.opened" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="cpp" value="3227" />
+          <entry key="cpp" value="3438" />
           <entry key="h" value="164" />
           <entry key="html" value="166" />
           <entry key="txt" value="31" />
@@ -56,19 +51,20 @@
           <entry key="CMakeLists.txt" value="31" />
           <entry key="Doxygen file" value="1" />
           <entry key="HTML" value="166" />
-          <entry key="ObjectiveC" value="3390" />
+          <entry key="ObjectiveC" value="3601" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
+          <entry key="Build All (disassembly)" value="2" />
           <entry key="c" value="2" />
-          <entry key="cpp" value="21" />
+          <entry key="cpp" value="23" />
           <entry key="functional" value="4" />
           <entry key="h" value="18" />
           <entry key="html" value="26" />
           <entry key="jpg" value="22" />
           <entry key="network2 (disassembly)" value="3" />
-          <entry key="png" value="37" />
+          <entry key="png" value="39" />
           <entry key="thread" value="3" />
           <entry key="txt" value="6" />
         </counts>
@@ -77,10 +73,10 @@
         <counts>
           <entry key="CMakeCache.txt" value="1" />
           <entry key="CMakeLists.txt" value="5" />
-          <entry key="Disassembly" value="3" />
+          <entry key="Disassembly" value="5" />
           <entry key="HTML" value="26" />
-          <entry key="Image" value="59" />
-          <entry key="ObjectiveC" value="48" />
+          <entry key="Image" value="61" />
+          <entry key="ObjectiveC" value="50" />
         </counts>
       </usages-collector>
     </session>
@@ -119,20 +115,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/receiver.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="403">
-              <caret line="76" selection-start-line="76" selection-end-line="76" />
+            <state relative-caret-position="-1044">
+              <caret line="23" column="33" lean-forward="true" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/server.cpp">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/utils.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
-              <caret line="129" column="17" selection-start-line="129" selection-start-column="17" selection-end-line="129" selection-end-column="17" />
+            <state relative-caret-position="476">
+              <caret line="70" column="35" lean-forward="true" selection-start-line="70" selection-start-column="35" selection-end-line="70" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -140,8 +136,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/my_server.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="126">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+            <state relative-caret-position="252">
+              <caret line="15" column="10" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="10" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/server.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="414">
+              <caret line="113" column="28" lean-forward="true" selection-start-line="113" selection-start-column="28" selection-end-line="113" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -157,16 +162,9 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>receiveGetRequest</find>
-      <find>getCurre</find>
-      <find>open</find>
-      <find>file Not found</find>
-      <find>pars</find>
-      <find>parse</find>
       <find>parse_req</find>
       <find>openfilewithpath</find>
       <find>fopen</find>
-      <find>file</find>
       <find>ffp</find>
       <find>read</find>
       <find>strlen</find>
@@ -187,6 +185,13 @@
       <find>hendy</find>
       <find>file not</find>
       <find>timeout</find>
+      <find>send failed</find>
+      <find>failed</find>
+      <find>send failed with error:</find>
+      <find>file</find>
+      <find>file length</find>
+      <find>length</find>
+      <find>close</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -202,13 +207,13 @@
         <option value="$PROJECT_DIR$/src/sender.h" />
         <option value="$PROJECT_DIR$/src/sender.cpp" />
         <option value="$PROJECT_DIR$/src/receiver.h" />
-        <option value="$PROJECT_DIR$/src/utils.cpp" />
         <option value="$PROJECT_DIR$/src/my_server.cpp" />
         <option value="$PROJECT_DIR$/src/server.h" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/src/utils.h" />
-        <option value="$PROJECT_DIR$/src/server.cpp" />
         <option value="$PROJECT_DIR$/src/receiver.cpp" />
+        <option value="$PROJECT_DIR$/src/server.cpp" />
+        <option value="$PROJECT_DIR$/src/utils.cpp" />
       </list>
     </option>
   </component>
@@ -221,7 +226,7 @@
   <component name="ProjectFrameBounds" extendedState="4">
     <option name="x" value="65" />
     <option name="y" value="24" />
-    <option name="width" value="948" />
+    <option name="width" value="928" />
     <option name="height" value="1056" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -311,11 +316,13 @@
       <workItem from="1542544740895" duration="13039000" />
       <workItem from="1542834445480" duration="3159000" />
       <workItem from="1542844297574" duration="2989000" />
+      <workItem from="1543084163317" duration="1846000" />
+      <workItem from="1543086763627" duration="3310000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59344000" />
+    <option name="totallyTimeSpent" value="66605000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -327,21 +334,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="24" width="948" height="1056" extended-state="4" />
+    <frame x="65" y="24" width="928" height="1056" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.30931264" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2585034" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3294979" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.24461207" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.21336207" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.2661638" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32985386" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Messages" order="8" weight="0.25" />
+      <window_info anchor="bottom" id="Messages" order="8" weight="0.27478448" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32985386" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="11" show_stripe_button="false" />
@@ -365,6 +372,31 @@
           <url>file://$PROJECT_DIR$/src/receiver.cpp</url>
           <line>24</line>
           <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/utils.cpp</url>
+          <line>63</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/utils.cpp</url>
+          <line>62</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/utils.cpp</url>
+          <line>61</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/server.cpp</url>
+          <line>152</line>
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/server.cpp</url>
+          <line>139</line>
+          <option name="timeStamp" value="41" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -397,13 +429,6 @@
     <entry file="file://$PROJECT_DIR$/src/sender.cpp" />
     <entry file="file://$PROJECT_DIR$/cmake-build-debug/img.jpg" />
     <entry file="file:///usr/include/c++/5/functional" />
-    <entry file="file://$PROJECT_DIR$/src/utils.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1377">
-          <caret line="81" column="37" selection-start-line="81" selection-start-column="37" selection-end-line="81" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
@@ -427,13 +452,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
           <caret line="5" column="118" selection-start-line="5" selection-start-column="118" selection-end-line="5" selection-end-column="118" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/my_server.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
         </state>
       </provider>
     </entry>
@@ -462,15 +480,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/server.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="129" column="17" selection-start-line="129" selection-start-column="17" selection-end-line="129" selection-end-column="17" />
+        <state relative-caret-position="414">
+          <caret line="113" column="28" lean-forward="true" selection-start-line="113" selection-start-column="28" selection-end-line="113" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/receiver.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="403">
-          <caret line="76" selection-start-line="76" selection-end-line="76" />
+        <state relative-caret-position="-1044">
+          <caret line="23" column="33" lean-forward="true" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/my_server.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="15" column="10" selection-start-line="15" selection-start-column="10" selection-end-line="15" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="476">
+          <caret line="70" column="35" lean-forward="true" selection-start-line="70" selection-start-column="35" selection-end-line="70" selection-end-column="35" />
         </state>
       </provider>
     </entry>
