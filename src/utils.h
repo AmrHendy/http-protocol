@@ -18,6 +18,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
+using namespace std;
+
 int getFileLength(FILE * fp);
 int sendBufferToSocket(char *buffer, int buffer_size, int socketfd);
 void sendFile(FILE* file, int client, char status_line[]);

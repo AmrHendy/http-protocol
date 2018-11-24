@@ -6,22 +6,20 @@
 
 void openFileWithPathAndSend(string file_path, int client);
 void parse_data_from_file(char * buffer, int buffer_size, int &data_start_position, int &data_content_length);
-void receiveGETRequest(int client);
+void receiveGETRequest(int client, int request_size);
 void receivePOSTRequest(int client_socketfd);
 
 // input regex. "GET /index.html HTTP/1.1\r\nHOST: 0.0.0.0:2000\r\n\r\n"
 static const string REGEX_GET_POST = "((GET|POST)\\s/(.+)\\s(HTTP.+)\\r\\n(.+).*?)";
 
-// TODO unused ??
-std::mutex hendy_mutex;
-
 /*
  * Server call this function to respond to any request from client.
  */
 void receiveRequest(char *request, int request_size, int client_socketfd) {
+    printf("=============================================\n");
     if (strncmp(request, "GET", 3) == 0) {
         string tmp(request);
-        receiveGETRequest(client_socketfd);
+        receiveGETRequest(client_socketfd, request_size);
         cout << "Sent File Complete (Finished GET Request at Server)" << endl;
     } else if (strncmp(request, "POST", 4) == 0) {
         receivePOSTRequest(client_socketfd);
@@ -36,8 +34,7 @@ void receiveRequest(char *request, int request_size, int client_socketfd) {
  * Server call this function to respond to GET request from client.
  */
 
-void receiveGETRequest(int client){
-    const int request_size = 10000;
+void receiveGETRequest(int client, int request_size){
     char* buffer = (char*) malloc(request_size);
     int val_read = read(client , buffer, request_size);
     string request(buffer);
@@ -49,8 +46,6 @@ void receivePOSTRequest(int client_socketfd) {
     const int MAX_SIZE = 500000;
     char * buffer = (char *) malloc(MAX_SIZE);
 
-    /*   START MUTEX */
-    //hendy_mutex.lock();
 
     // read the first part to parse the file url, and not advancing the socket pointer
     int status = recv(client_socketfd, buffer, MAX_SIZE, 0);
@@ -79,6 +74,7 @@ void receivePOSTRequest(int client_socketfd) {
     /* call here send post respone which include OK. */
     string OkResponse = "HTTP/1.1 200 OK\r\n";
     sendBufferToSocket(strdup(OkResponse.c_str()), OkResponse.size(),client_socketfd);
+
     // receive the file conetent after the client respond parse the request to get the data
     status = recv(client_socketfd, buffer, data_start_position + data_content_length, 0);
     if(status <= 0){
@@ -95,8 +91,6 @@ void receivePOSTRequest(int client_socketfd) {
         status = recv(client_socketfd, (char *)(file_buffer + current_index), data_content_length - current_index, 0);
         current_index += status;
     }
-    //hendy_mutex.unlock();
-    /*   END MUTEX */
 
     /*open new file */
     FILE * fp = fopen(file_url, "wb");

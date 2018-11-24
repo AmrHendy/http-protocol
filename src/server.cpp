@@ -68,8 +68,8 @@ void start_server(int port_number){
          */
         printf("Thread Started for the new client.\n");
         if(clients == MAX_ALLOWED_CONNECTIONS){
-            printf("Reached the max limit number of connections, So server can't handle that client connection\n")
-            continue
+            printf("Reached the max limit number of connections, So server can't handle that client connection\n");
+            continue;
         }
         std::thread t(handle_connection, client);
         t.detach();//this will allow the thread run on its own see join function in docs for more information
@@ -116,13 +116,7 @@ void handle_connection(int client_fd) {
             printf("No more requests from client with fd = %d within the last 5 seconds, So the server will close the client connection\n",client_fd);
             break;
         }
-        if(requests_count == MAX_ALLOWED_REQUESTS_PER_CONNECTION){
-            printf("Reached the max limit number of requests of the same connection, So server can't handle that request from the client\n")
-            break;
-        }
-        requests_count++;
         handle_request(client_fd);
-        requests_count--;
     }
     mtx.lock();
     clients--;
@@ -142,13 +136,33 @@ int waitForRequest(int client_fd){
     return (retval!= -1) ? 1 : -1;
 }
 
-// TODO will the requests run in separate thread / parallel or the same thread / sequential
-// TODO problems with multiple thread :
-// select will return true which means i have a new request but that is wrong as socket may recev data from old request also not new requests always
-// also we will need mutex for every fd , that mutex will be used as we use in receiver
 void handle_request(int client_fd){
     const int request_size = 10000;
     char* buffer = (char*) malloc(request_size);
     int val_read = recv(client_fd , buffer, request_size, MSG_PEEK);
-    receiveRequest(buffer, val_read, client_fd);
+    int index = 0;
+    int start = -1;
+    int end = -1;
+    while(index < val_read){
+        if(strncmp(buffer + index, "GET", 3) == 0){
+            if(start == -1){
+                start = index;
+            }else if(end == -1){
+                end = index - 1;
+                printf("%d %d\n",start, end);
+                receiveRequest(buffer, end - start + 1, client_fd);
+                start = end + 1;
+                end = -1;
+            }
+        }else if (strncmp(buffer, "POST", 4) == 0){
+            start = -1;
+            receiveRequest(buffer, val_read, client_fd);
+            break;
+        }
+        index++;
+    }
+    if(start != -1){
+        end = val_read - 1;
+        receiveRequest(buffer, end - start + 1, client_fd);
+    }
 }

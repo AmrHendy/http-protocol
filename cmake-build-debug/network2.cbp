@@ -99,6 +99,12 @@
 		<Unit filename="/home/arsanuos/network2/src/server.h">
 			<Option target="network2"/>
 		</Unit>
+		<Unit filename="/home/arsanuos/network2/src/utils.cpp">
+			<Option target="network2"/>
+		</Unit>
+		<Unit filename="/home/arsanuos/network2/src/utils.h">
+			<Option target="network2"/>
+		</Unit>
 		<Unit filename="/home/arsanuos/network2/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
