@@ -1,11 +1,11 @@
 # HTTP Server Client Protocol
-In this project, we will show how to implemet HTTP Protocl using UNIX sockets to be used to implement a simple web client
+In this project, we will show how to implement HTTP Protocol using UNIX sockets to be used to implement a simple web client
 that communicates with a web server using a restricted subset of HTTP.<br/>
 
 ## Features
 - [x] POST Request
 - [x] GET Request
-- [x] Persistent Connections
+- [x] Persistent Connections (Supporting HTTP 1.1)
 - [x] Pipelining GET Requests
 - [x] Supporting all file types (HTML, TXT, Images, Videos)
 - [x] Testing with real browsers
