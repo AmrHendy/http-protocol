@@ -1,7 +1,6 @@
 # HTTP Server Client Protocol
 In this project, we will show how to implemet HTTP Protocl using UNIX sockets to be used to implement a simple web client
 that communicates with a web server using a restricted subset of HTTP.<br/>
-The project is implemented in C++ 
 
 ## Features
 - [x] POST Request
