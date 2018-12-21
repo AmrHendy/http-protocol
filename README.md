@@ -1,4 +1,4 @@
-# HTTP Server Client Protocol
+# HTTP Client Server
 In this project, we will show how to implement HTTP Protocol using UNIX sockets to be used to implement a simple web client
 that communicates with a web server using a restricted subset of HTTP.<br/>
 
